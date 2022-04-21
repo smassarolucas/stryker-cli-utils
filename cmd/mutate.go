@@ -18,9 +18,12 @@ var mutateCmd = &cobra.Command{
 	Long:  `Runs Stryker.NET for ALL projects ending with stryker-config.json, outputs the result as a single HTML file and cleans the other reports.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("mutate called")
-		helpers.GetStrykerConfigFileNames()
-		// TODO: Read all stryker-config.json instances
+		fileNames := helpers.GetStrykerConfigFileNames()
 		// TODO: Run Stryker.NET for all configs
+		for _, fileName := range fileNames {
+			helpers.RunStrykerMutator(fileName)
+		}
+
 		// TODO: Merge the reports and output the location
 	},
 }

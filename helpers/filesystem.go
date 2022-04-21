@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -31,11 +30,13 @@ func GetStrykerConfigFileNames() []string {
 		log.Fatalf("Couldn't compile the regex %v because of error %v", strykerConfigRegex, err.Error())
 	}
 
-	for index, fileName := range files {
+	fileNames := []string{}
+
+	for _, fileName := range files {
 		if match := regex.MatchString(fileName); match {
-			fmt.Printf("File name of file %d is %v\n", index, fileName)
+			fileNames = append(fileNames, fileName)
 		}
 	}
 
-	return make([]string, 0)
+	return fileNames
 }
