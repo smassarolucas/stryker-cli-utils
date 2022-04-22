@@ -2,13 +2,16 @@ package helpers
 
 import (
 	"bufio"
+	"bytes"
+	"embed"
 	"encoding/json"
-	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+	"text/template"
 )
 
 const (
@@ -27,12 +30,78 @@ func RunStrykerMutator(configFile string) error {
 	return nil
 }
 
+var (
+	//go:embed "templates/*.gohtml"
+	reportTemplates embed.FS
+)
+
+type ReportRenderer struct {
+	templ *template.Template
+}
+
+func NewReportRenderer() (*ReportRenderer, error) {
+	templ, err := template.ParseFS(reportTemplates, "templates/*.gohtml")
+	if err != nil {
+		return nil, err
+	}
+
+	return &ReportRenderer{templ: templ}, nil
+}
+
+type ReportString struct {
+	Files string
+}
+
+func (r *ReportRenderer) Render(w io.Writer, report MutationReport) error {
+	jsonReportData, _ := json.Marshal(report)
+	stringReportData := ReportString{string(jsonReportData)}
+	if err := r.templ.Execute(w, stringReportData); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func MergeStrykerReports(filePaths []string) string {
+	strykerReports := make([]MutationReport, len(filePaths))
 
 	// TODO: Make use of goroutines to parse files separatedly
 	for _, filePath := range filePaths {
-		fmt.Println(filePath)
+		strykerReport := ParseMutationReport(filePath)
+		strykerReports = append(strykerReports, strykerReport)
 	}
+
+	reportFiles := make(map[string]MutationReportItem)
+	for _, report := range strykerReports {
+		for key, value := range report.Files {
+			reportFiles[key] = value
+		}
+	}
+
+	finalReport := MutationReport{
+		SchemaVersion: strykerReports[0].SchemaVersion,
+		Thresholds:    strykerReports[0].Thresholds,
+		ProjectRoot:   strykerReports[0].ProjectRoot,
+		Files:         reportFiles,
+	}
+
+	reportRenderer, err := NewReportRenderer()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	buf := bytes.Buffer{}
+	if err := reportRenderer.Render(&buf, finalReport); err != nil {
+		log.Fatalln(err)
+	}
+
+	f, err := os.Create("./test.html")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer f.Close()
+	f.WriteString(buf.String())
+
 	return ""
 }
 
@@ -74,7 +143,7 @@ const (
 	reportDataPrefixRegex = "^\\s*" + reportDataPrefix
 )
 
-func ParseMutationReport(filePath string) {
+func ParseMutationReport(filePath string) MutationReport {
 	file, err := os.Open(filePath)
 	if err != nil {
 		log.Fatalln(err)
@@ -94,15 +163,18 @@ func ParseMutationReport(filePath string) {
 			reportData := strings.Split(line, reportDataPrefix)[1]
 			reportData = strings.TrimSuffix(reportData, reportDataSuffix)
 			json.Unmarshal([]byte(reportData), &mutationReport)
-			// TODO: Alter the keys in the Files map to properly show the different projects
-
-			// TODO: Make this another method, running only once when the goroutines finish their processing
-			jsonReportData, _ := json.Marshal(mutationReport)
-			stringReportData := string(jsonReportData)
-			fmt.Println(string(stringReportData))
+			files := make(map[string]MutationReportItem)
+			for key, value := range mutationReport.Files {
+				testStrings := strings.Split(mutationReport.ProjectRoot, ".")
+				finalString := testStrings[len(testStrings)-1]
+				newKey := finalString + "\\" + key
+				files[newKey] = value
+			}
+			mutationReport.Files = files
 		}
 		line, err = readLine(reader)
 	}
+	return mutationReport
 }
 
 func readLine(r *bufio.Reader) (string, error) {

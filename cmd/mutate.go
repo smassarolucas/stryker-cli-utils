@@ -18,15 +18,12 @@ var mutateCmd = &cobra.Command{
 	Long:  `Runs Stryker.NET for ALL projects ending with stryker-config.json, outputs the result as a single HTML file and cleans the other reports.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("mutate called")
-		// fileNames := helpers.GetStrykerConfigFileNames()
-		// for _, fileName := range fileNames {
-		// 	helpers.RunStrykerMutator(fileName)
-		// }
-		// filePaths := helpers.GetMutationReportsFilePaths()
-		// mergedReportPath := helpers.MergeStrykerReports(filePaths)
-		// fmt.Println(mergedReportPath)
-		helpers.ParseMutationReport("C:\\Users\\smass\\source\\repos\\rasta-io.api-agenda-jhulia\\StrykerOutput\\2022-04-21.17-23-02\\reports\\mutation-report.html")
-		// TODO: Merge the reports and output the location, deleting the source files
+		fileNames := helpers.GetStrykerConfigFileNames()
+		for _, fileName := range fileNames {
+			helpers.RunStrykerMutator(fileName)
+		}
+		filePaths := helpers.GetMutationReportsFilePaths()
+		helpers.MergeStrykerReports(filePaths)
 	},
 }
 
