@@ -12,6 +12,14 @@ import (
 )
 
 // mutateCmd represents the mutate command
+// TODO:See what can be parallel
+// TODO: Create tests
+// TODO: Separate files and concerns
+// TODO: Make the report location passable as a flag
+// TODO: Improve the default report name
+// TODO: Delete StrykerReport folder
+// TODO: Make sure there are no fixed folder things
+// TODO: Remove all jank
 var mutateCmd = &cobra.Command{
 	Use:   "mutate",
 	Short: "Runs .NET for all configs and condenses the reports in one",
