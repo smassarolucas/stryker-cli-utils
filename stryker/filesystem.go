@@ -71,3 +71,16 @@ func GetMutationReportsFilePaths() []string {
 
 	return filePaths
 }
+
+func WriteToFile(content, fileName string) string {
+	f, err := os.Create(fileName)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer f.Close()
+
+	f.WriteString(content)
+
+	filePath, _ := filepath.Abs(f.Name())
+	return filePath
+}

@@ -9,40 +9,6 @@ import (
 	"strings"
 )
 
-type MutationReport struct {
-	SchemaVersion string `json:"schemaVersion"`
-	Thresholds    `json:"thresholds"`
-	ProjectRoot   string                        `json:"projectRoot"`
-	Files         map[string]MutationReportItem `json:"files"`
-}
-
-type Thresholds struct {
-	High int `json:"high"`
-	Low  int `json:"low"`
-}
-
-type MutationReportItem struct {
-	Language string `json:"language"`
-	Source   string `json:"source"`
-	Mutants  []struct {
-		ID          string `json:"id"`
-		MutatorName string `json:"mutatorName"`
-		Replacement string `json:"replacement"`
-		Location    struct {
-			Start struct {
-				Line   int `json:"line"`
-				Column int `json:"column"`
-			} `json:"start"`
-			End struct {
-				Line   int `json:"line"`
-				Column int `json:"column"`
-			} `json:"end"`
-		} `json:"location"`
-		Status string `json:"status"`
-		Static bool   `json:"static"`
-	} `json:"mutants"`
-}
-
 const (
 	reportDataPrefix      = "app.report = "
 	reportDataSuffix      = ";"
@@ -64,24 +30,27 @@ func ParseMutationReport(filePath string) MutationReport {
 	reader := bufio.NewReader(file)
 	line, err := readLine(reader)
 	mutationReport := MutationReport{}
-	// TODO: fix this
 	for err == nil {
 		if match := regex.MatchString(line); match {
 			reportData := strings.Split(line, reportDataPrefix)[1]
 			reportData = strings.TrimSuffix(reportData, reportDataSuffix)
 			json.Unmarshal([]byte(reportData), &mutationReport)
-			files := make(map[string]MutationReportItem)
-			for key, value := range mutationReport.Files {
-				testStrings := strings.Split(mutationReport.ProjectRoot, ".")
-				finalString := testStrings[len(testStrings)-1]
-				newKey := finalString + "\\" + key
-				files[newKey] = value
-			}
-			mutationReport.Files = files
+			mutationReport.Files = parseMutationFiles(mutationReport, line)
 		}
 		line, err = readLine(reader)
 	}
 	return mutationReport
+}
+
+func parseMutationFiles(mutationReport MutationReport, line string) map[string]MutationReportItem {
+	files := make(map[string]MutationReportItem)
+	for key, value := range mutationReport.Files {
+		projectRootStrings := strings.Split(mutationReport.ProjectRoot, ".")
+		lastProjectRootString := projectRootStrings[len(projectRootStrings)-1]
+		newKey := lastProjectRootString + "\\" + key
+		files[newKey] = value
+	}
+	return files
 }
 
 func readLine(r *bufio.Reader) (string, error) {

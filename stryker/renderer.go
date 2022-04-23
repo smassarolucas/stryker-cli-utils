@@ -1,9 +1,11 @@
 package stryker
 
 import (
+	"bytes"
 	"embed"
 	"encoding/json"
 	"io"
+	"log"
 	"text/template"
 )
 
@@ -16,7 +18,21 @@ type ReportRenderer struct {
 	templ *template.Template
 }
 
-func NewReportRenderer() (*ReportRenderer, error) {
+func RenderHtmlReport(report MutationReport) string {
+	reportRenderer, err := newReportRenderer()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	buf := bytes.Buffer{}
+	if err := reportRenderer.render(&buf, report); err != nil {
+		log.Fatalln(err)
+	}
+
+	return buf.String()
+}
+
+func newReportRenderer() (*ReportRenderer, error) {
 	templ, err := template.ParseFS(reportTemplates, "templates/*.gohtml")
 	if err != nil {
 		return nil, err
@@ -29,7 +45,7 @@ type ReportString struct {
 	Files string
 }
 
-func (r *ReportRenderer) Render(w io.Writer, report MutationReport) error {
+func (r *ReportRenderer) render(w io.Writer, report MutationReport) error {
 	jsonReportData, _ := json.Marshal(report)
 	stringReportData := ReportString{string(jsonReportData)}
 	if err := r.templ.Execute(w, stringReportData); err != nil {
