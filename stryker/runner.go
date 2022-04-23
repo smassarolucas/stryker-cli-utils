@@ -15,6 +15,7 @@ func RunStrykerForAllConfigs() {
 func GenerateReport(reportLocation string) string {
 	filePaths := GetMutationReportsFilePaths()
 	reportPath := MergeStrykerReports(filePaths, reportLocation)
+	DeleteStrykerOutputFolder()
 	return reportPath
 }
 

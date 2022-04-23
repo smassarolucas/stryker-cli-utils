@@ -84,3 +84,14 @@ func WriteToFile(content, fileName string) string {
 	filePath, _ := filepath.Abs(f.Name())
 	return filePath
 }
+
+const (
+	strykerOutputFolder = "StrykerOutput"
+)
+
+func DeleteStrykerOutputFolder() {
+	err := os.RemoveAll(strykerOutputFolder)
+	if err != nil {
+		log.Fatalf("Couldn't remove %v because of %v", strykerOutputFolder, err)
+	}
+}

@@ -11,7 +11,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// TODO: Delete StrykerReport folder
 var mutateCmd = &cobra.Command{
 	Use:   "mutate",
 	Short: "Runs .NET for all configs and condenses the reports in one",
