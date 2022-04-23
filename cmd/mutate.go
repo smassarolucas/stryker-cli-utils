@@ -5,33 +5,30 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
+	"log"
 
-	"github.com/smassarolucas/stryker-cli-utils/helpers"
+	"github.com/smassarolucas/stryker-cli-utils/stryker"
 	"github.com/spf13/cobra"
 )
 
 // mutateCmd represents the mutate command
-// TODO:See what can be parallel
+// TODO: See what can be parallel
 // TODO: Create tests
 // TODO: Separate files and concerns
 // TODO: Make the report location passable as a flag
-// TODO: Improve the default report name
 // TODO: Delete StrykerReport folder
 // TODO: Make sure there are no fixed folder things
 // TODO: Remove all jank
+// TODO: Log everything
 var mutateCmd = &cobra.Command{
 	Use:   "mutate",
 	Short: "Runs .NET for all configs and condenses the reports in one",
 	Long:  `Runs Stryker.NET for ALL projects ending with stryker-config.json, outputs the result as a single HTML file and cleans the other reports.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("mutate called")
-		fileNames := helpers.GetStrykerConfigFileNames()
-		for _, fileName := range fileNames {
-			helpers.RunStrykerMutator(fileName)
-		}
-		filePaths := helpers.GetMutationReportsFilePaths()
-		helpers.MergeStrykerReports(filePaths)
+		log.Println("Execution started!")
+		reportPath := stryker.RunStrykerForAllConfigs()
+		log.Println("Execution finished!")
+		log.Printf("Report generated at: %v\n", reportPath)
 	},
 }
 

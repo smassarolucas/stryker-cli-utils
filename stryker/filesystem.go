@@ -1,4 +1,4 @@
-package helpers
+package stryker
 
 import (
 	"io/fs"
@@ -10,31 +10,28 @@ import (
 
 const (
 	strykerConfigNameSufix = "-stryker-config.json"
-	strykerConfigRegex     = ".*\\" + strykerConfigNameSufix + "$"
-	dirName                = "."
-	strykerReportsDirName  = "./StrykerOutput"
-	mutationReportRegex    = ".*\\-report.html$"
+	isStrykerConfigRegex   = ".*\\" + strykerConfigNameSufix + "$"
+	currentDirName         = "."
 )
 
 func GetStrykerConfigFileNames() []string {
-	dir, err := os.Open(dirName)
+	dir, err := os.Open(currentDirName)
 	if err != nil {
-		log.Fatalf("Couldn't open directory %v because of error %v", dirName, err.Error())
+		log.Fatalf("Couldn't open directory %v because of error %v", currentDirName, err.Error())
 	}
 	defer dir.Close()
 
 	files, err := dir.Readdirnames(-1)
 	if err != nil {
-		log.Fatalf("Couldn't read names of directory %v because of error %v", dirName, err.Error())
+		log.Fatalf("Couldn't read names of directory %v because of error %v", currentDirName, err.Error())
 	}
 
-	regex, err := regexp.Compile(strykerConfigRegex)
+	regex, err := regexp.Compile(isStrykerConfigRegex)
 	if err != nil {
-		log.Fatalf("Couldn't compile the regex %v because of error %v", strykerConfigRegex, err.Error())
+		log.Fatalf("Couldn't compile the regex %v because of error %v", isStrykerConfigRegex, err.Error())
 	}
 
 	fileNames := []string{}
-
 	for _, fileName := range files {
 		if match := regex.MatchString(fileName); match {
 			fileNames = append(fileNames, fileName)
@@ -44,10 +41,15 @@ func GetStrykerConfigFileNames() []string {
 	return fileNames
 }
 
+const (
+	strykerReportsDirName = "./StrykerOutput"
+	isMutationReportRegex = ".*\\-report.html$"
+)
+
 func GetMutationReportsFilePaths() []string {
-	regex, err := regexp.Compile(mutationReportRegex)
+	regex, err := regexp.Compile(isMutationReportRegex)
 	if err != nil {
-		log.Fatalf("Couldn't compile the regex %v because of error %v", strykerConfigRegex, err.Error())
+		log.Fatalf("Couldn't compile the regex %v because of error %v", isStrykerConfigRegex, err.Error())
 	}
 
 	filePaths := []string{}
