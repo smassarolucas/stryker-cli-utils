@@ -29,5 +29,5 @@ var mutateCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(mutateCmd)
 
-	mutateCmd.Flags().String("reportLocation", "", "Location for the report to be generated")
+	mutateCmd.Flags().String("reportLocation", "", "Location for the report to be generated. IMPORTANT: should be used inside double quotes like \"C:/dev/report.html\"")
 }
