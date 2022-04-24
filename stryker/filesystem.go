@@ -1,6 +1,7 @@
 package stryker
 
 import (
+	"errors"
 	"io/fs"
 	"log"
 	"path/filepath"
@@ -25,21 +26,21 @@ func init() {
 	FSUtil = &iowrap.Afero{Fs: FS}
 }
 
-func getStrykerConfigFileNames() []string {
+func getStrykerConfigFileNames() ([]string, error) {
 	dir, err := FS.Open(currentDirName)
 	if err != nil {
-		log.Fatalf("Couldn't open directory %v because of error %v", currentDirName, err.Error())
+		return nil, err
 	}
 	defer dir.Close()
 
 	files, err := dir.Readdirnames(-1)
 	if err != nil {
-		log.Fatalf("Couldn't read names of directory %v because of error %v", currentDirName, err.Error())
+		return nil, err
 	}
 
 	regex, err := regexp.Compile(isStrykerConfigRegex)
 	if err != nil {
-		log.Fatalf("Couldn't compile the regex %v because of error %v", isStrykerConfigRegex, err.Error())
+		return nil, err
 	}
 
 	fileNames := []string{}
@@ -49,7 +50,11 @@ func getStrykerConfigFileNames() []string {
 		}
 	}
 
-	return fileNames
+	if len(fileNames) == 0 {
+		return nil, errors.New("there are no Stryker config files")
+	}
+
+	return fileNames, nil
 }
 
 const (

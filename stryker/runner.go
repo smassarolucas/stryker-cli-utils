@@ -6,7 +6,11 @@ import (
 )
 
 func RunStrykerForAllConfigs() {
-	fileNames := getStrykerConfigFileNames()
+	fileNames, err := getStrykerConfigFileNames()
+
+	if err != nil {
+		log.Fatalf("Couldn't get config files because of error: %v", err.Error())
+	}
 	for _, fileName := range fileNames {
 		runStrykerMutator(fileName)
 	}
