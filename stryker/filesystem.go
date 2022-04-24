@@ -3,9 +3,10 @@ package stryker
 import (
 	"io/fs"
 	"log"
-	"os"
 	"path/filepath"
 	"regexp"
+
+	iowrap "github.com/spf13/afero"
 )
 
 const (
@@ -14,8 +15,18 @@ const (
 	currentDirName         = "."
 )
 
+var (
+	FS     iowrap.Fs
+	FSUtil *iowrap.Afero
+)
+
+func init() {
+	FS = iowrap.NewOsFs()
+	FSUtil = &iowrap.Afero{Fs: FS}
+}
+
 func getStrykerConfigFileNames() []string {
-	dir, err := os.Open(currentDirName)
+	dir, err := FS.Open(currentDirName)
 	if err != nil {
 		log.Fatalf("Couldn't open directory %v because of error %v", currentDirName, err.Error())
 	}
@@ -53,7 +64,7 @@ func getMutationReportsFilePaths() []string {
 	}
 
 	filePaths := []string{}
-	err = filepath.Walk(strykerReportsDirName, func(path string, info fs.FileInfo, err error) error {
+	err = FSUtil.Walk(strykerReportsDirName, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -73,7 +84,7 @@ func getMutationReportsFilePaths() []string {
 }
 
 func writeToFile(content, fileName string) string {
-	f, err := os.Create(fileName)
+	f, err := FS.Create(fileName)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -90,7 +101,7 @@ const (
 )
 
 func deleteStrykerOutputFolder() {
-	err := os.RemoveAll(strykerOutputFolder)
+	err := FS.RemoveAll(strykerOutputFolder)
 	if err != nil {
 		log.Fatalf("Couldn't remove %v because of %v", strykerOutputFolder, err)
 	}
