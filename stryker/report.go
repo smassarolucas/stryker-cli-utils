@@ -38,7 +38,7 @@ const (
 	defaultReportName = "./consolidated-report.html"
 )
 
-func MergeStrykerReports(filePaths []string, reportLocation string) string {
+func mergeStrykerReports(filePaths []string, reportLocation string) string {
 	reports, thresholds := joinReports(filePaths)
 
 	reportFiles := make(map[string]MutationReportItem)
@@ -58,12 +58,12 @@ func MergeStrykerReports(filePaths []string, reportLocation string) string {
 		Files:       reportFiles,
 	}
 
-	report := RenderHtmlReport(mergedReport)
+	report := renderHtmlReport(mergedReport)
 
 	if reportLocation == "" {
 		reportLocation = defaultReportName
 	}
-	filePath := WriteToFile(report, reportLocation)
+	filePath := writeToFile(report, reportLocation)
 
 	return filePath
 }
@@ -72,7 +72,7 @@ func joinReports(filePaths []string) ([]MutationReport, Thresholds) {
 	strykerReports := make([]MutationReport, 0)
 	thresholds := Thresholds{High: 0, Low: 0}
 	for _, filePath := range filePaths {
-		strykerReport := ParseMutationReport(filePath)
+		strykerReport := parseMutationReport(filePath)
 		thresholds.High += strykerReport.Thresholds.High
 		thresholds.Low += strykerReport.Thresholds.Low
 		strykerReports = append(strykerReports, strykerReport)

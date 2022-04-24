@@ -14,7 +14,7 @@ const (
 	currentDirName         = "."
 )
 
-func GetStrykerConfigFileNames() []string {
+func getStrykerConfigFileNames() []string {
 	dir, err := os.Open(currentDirName)
 	if err != nil {
 		log.Fatalf("Couldn't open directory %v because of error %v", currentDirName, err.Error())
@@ -46,7 +46,7 @@ const (
 	isMutationReportRegex = ".*\\-report.html$"
 )
 
-func GetMutationReportsFilePaths() []string {
+func getMutationReportsFilePaths() []string {
 	regex, err := regexp.Compile(isMutationReportRegex)
 	if err != nil {
 		log.Fatalf("Couldn't compile the regex %v because of error %v", isStrykerConfigRegex, err.Error())
@@ -72,7 +72,7 @@ func GetMutationReportsFilePaths() []string {
 	return filePaths
 }
 
-func WriteToFile(content, fileName string) string {
+func writeToFile(content, fileName string) string {
 	f, err := os.Create(fileName)
 	if err != nil {
 		log.Fatalln(err)
@@ -89,7 +89,7 @@ const (
 	strykerOutputFolder = "StrykerOutput"
 )
 
-func DeleteStrykerOutputFolder() {
+func deleteStrykerOutputFolder() {
 	err := os.RemoveAll(strykerOutputFolder)
 	if err != nil {
 		log.Fatalf("Couldn't remove %v because of %v", strykerOutputFolder, err)

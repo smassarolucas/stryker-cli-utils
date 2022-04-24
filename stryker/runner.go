@@ -6,16 +6,16 @@ import (
 )
 
 func RunStrykerForAllConfigs() {
-	fileNames := GetStrykerConfigFileNames()
+	fileNames := getStrykerConfigFileNames()
 	for _, fileName := range fileNames {
 		runStrykerMutator(fileName)
 	}
 }
 
 func GenerateReport(reportLocation string) string {
-	filePaths := GetMutationReportsFilePaths()
-	reportPath := MergeStrykerReports(filePaths, reportLocation)
-	DeleteStrykerOutputFolder()
+	filePaths := getMutationReportsFilePaths()
+	reportPath := mergeStrykerReports(filePaths, reportLocation)
+	deleteStrykerOutputFolder()
 	return reportPath
 }
 

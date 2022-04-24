@@ -18,7 +18,7 @@ type ReportRenderer struct {
 	templ *template.Template
 }
 
-func RenderHtmlReport(report MutationReport) string {
+func renderHtmlReport(report MutationReport) string {
 	reportRenderer, err := newReportRenderer()
 	if err != nil {
 		log.Fatalln(err)
