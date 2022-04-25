@@ -1,5 +1,5 @@
 /*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+Copyright © 2022 Lucas Smassaro at smassarolucas@gmail.com
 
 */
 package cmd
@@ -10,20 +10,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "stryker-cli-utils",
 	Short: "Utils for improving Stryker .NET experience.",
 	Long: `This package aims to be an improvement to the mutation testing experience with Stryker .NET (util now). Features, at the moment, include:
 	
-- Running all the mutation tests for the solutions and condensing the report`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+- Running all the mutation tests for the solutions and condensing the report
+- Passing the report location via flag`,
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
@@ -32,13 +27,4 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.stryker-cli-utils.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
