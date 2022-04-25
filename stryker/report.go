@@ -35,7 +35,7 @@ type MutationReportItem struct {
 }
 
 const (
-	defaultReportName = "./consolidated-report.html"
+	defaultReportName = "./mutation-report.html"
 )
 
 func mergeStrykerReports(filePaths []string, reportLocation string) string {
