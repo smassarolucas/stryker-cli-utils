@@ -15,7 +15,7 @@ const (
 	reportDataPrefixRegex = "^\\s*" + reportDataPrefix
 )
 
-func ParseMutationReport(filePath string) MutationReport {
+func parseMutationReport(filePath string) MutationReport {
 	file, err := os.Open(filePath)
 	if err != nil {
 		log.Fatalln(err)

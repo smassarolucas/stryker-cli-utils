@@ -6,16 +6,20 @@ import (
 )
 
 func RunStrykerForAllConfigs() {
-	fileNames := GetStrykerConfigFileNames()
+	fileNames, err := getStrykerConfigFileNames()
+
+	if err != nil {
+		log.Fatalf("Couldn't get config files because of error: %v", err.Error())
+	}
 	for _, fileName := range fileNames {
 		runStrykerMutator(fileName)
 	}
 }
 
 func GenerateReport(reportLocation string) string {
-	filePaths := GetMutationReportsFilePaths()
-	reportPath := MergeStrykerReports(filePaths, reportLocation)
-	DeleteStrykerOutputFolder()
+	filePaths := getMutationReportsFilePaths()
+	reportPath := mergeStrykerReports(filePaths, reportLocation)
+	deleteStrykerOutputFolder()
 	return reportPath
 }
 
