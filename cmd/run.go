@@ -13,8 +13,8 @@ import (
 
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "Runs .NET for all configs and condenses the reports in one",
-	Long:  `Runs Stryker.NET for ALL projects ending with stryker-config.json, outputs the result as a single HTML file and cleans the other reports.`,
+	Short: "Runs Stryker.NET for multiple projects and merges the reports into one",
+	Long:  `Runs Stryker.NET for multiple projects, outputs the result as a single HTML file and cleans the other reports.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Println("Execution started!")
 
