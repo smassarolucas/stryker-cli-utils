@@ -1,11 +1,13 @@
 package stryker
 
 import (
+	"bufio"
 	"errors"
 	"io/fs"
 	"log"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	iowrap "github.com/spf13/afero"
 )
@@ -55,6 +57,85 @@ func getStrykerConfigFileNames() ([]string, error) {
 	}
 
 	return fileNames, nil
+}
+
+func getProjectsToMutate() ([]string, string) {
+	testProjectPath := getTestProjectPath()
+	mutableProjects := getMutableProjects(testProjectPath)
+	return mutableProjects, testProjectPath
+}
+
+const (
+	isTestProjectRegex = `.*Tests.csproj`
+)
+
+func getTestProjectPath() string {
+	regex, err := regexp.Compile(isTestProjectRegex)
+	if err != nil {
+		log.Fatalf("Couldn't compile the regex %v because of error %v", isTestProjectRegex, err.Error())
+	}
+
+	var testProjectPath string
+	err = FSUtil.Walk(".", func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() && (info.Name() == "obj" || info.Name() == "bin") {
+			return filepath.SkipDir
+		}
+
+		if match := regex.MatchString(info.Name()); match {
+			log.Println(testProjectPath)
+			testProjectPath = path
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		log.Fatalf("Got error %v", err.Error())
+	}
+	return testProjectPath
+}
+
+const (
+	isTestableProject      = `.*.csproj\" />`
+	projectReferencePrefix = `<ProjectReference Include="`
+	projectReferenceSuffix = `" />`
+)
+
+func getMutableProjects(testProjectPath string) []string {
+	file, err := FS.Open(testProjectPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	regex, err := regexp.Compile(isTestableProject)
+	if err != nil {
+		log.Fatalf("Couldn't compile the regex %v because of error %v", isTestProjectRegex, err.Error())
+	}
+
+	filePaths := []string{}
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if match := regex.MatchString(scanner.Text()); match {
+			line = strings.Trim(line, " ")
+			line = strings.TrimPrefix(line, projectReferencePrefix)
+			line = strings.TrimSuffix(line, projectReferenceSuffix)
+			splittedLine := strings.Split(line, "\\")
+			line = splittedLine[len(splittedLine)-1]
+			filePaths = append(filePaths, line)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	return filePaths
 }
 
 const (
